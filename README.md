@@ -1,7 +1,7 @@
 <p align="center"><a href="https://www.vedassistemas.com.br/" target="_blank">
 <img src="http://vedassistemas.com.br/img/LOGO.png" width="400" alt="Vedas Sistemas"></a></p>
 
-# VEDAS SISTEMAS - API de liberação
+# VEDAS SISTEMAS - Gestão
 
 Este é um projeto privado desenvolvido pela VEDAS SISTEMAS. O objetivo do projeto é gerenciar acesso ao serviço de entregador do vedas de acordo com a liberação por cada usuário.
 
