@@ -10,7 +10,7 @@ export const IconButton = ({ ...props }: IconButtonProps) => {
     <button
       {...props}
       className={twMerge(
-        "border rounded-md p-1.5 transition-all duration-200",
+        "md:border rounded-md p-1.5 transition-all duration-200",
         props.disabled ? "opacity-45" : "hover:bg-accent hover:text-primary"
       )}
     />

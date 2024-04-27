@@ -3,7 +3,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -13,7 +12,7 @@ import { axiosService } from "@/services/axios.service";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useState } from "react";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, Trash2Icon } from "lucide-react";
 
 interface ModalDeleteCompanyProps {
   open: boolean;
@@ -65,11 +64,13 @@ export const ModalDeleteCompany = ({
     <AlertDialog open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Você tem certeza disso ?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Essa ação não pode ser desfeita. Isso excluirá permanentemente a
-            empresa selecionada e removerá todos os dados associados a ela.
-          </AlertDialogDescription>
+          <div className="flex justify-center py-5">
+            <Trash2Icon size={90} />
+          </div>
+          <AlertDialogTitle className="text-balance text-center">
+            Tem certeza que deseja deletar a empresa empresa{" "}
+            <span className="font-black">{company.name}</span>?
+          </AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>Cancelar</AlertDialogCancel>

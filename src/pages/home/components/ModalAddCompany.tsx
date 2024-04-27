@@ -28,6 +28,8 @@ import { Loader2Icon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 interface ModalAddCompanyProps {
   open: boolean;
   onClose: () => void;
@@ -112,202 +114,210 @@ export const ModalAddCompany = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Adicionar Empresa</DialogTitle>
-        </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5">
-            <div
-              className="grid gap-5"
-              style={{ gridTemplateColumns: "120px 1fr" }}
-            >
-              <FormField
-                control={form.control}
-                name="id_machine"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ID Machine</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
+            <Tabs defaultValue="Geral" className="w-full">
+              <div className="flex justify-center">
+                <TabsList className="mb-5">
+                  <TabsTrigger value="Geral">Geral</TabsTrigger>
+                  <TabsTrigger value="Informaçõoes">Informaçõoes</TabsTrigger>
+                </TabsList>
+              </div>
+              <DialogHeader className="mb-5">
+                <DialogTitle>Adicionar Empresa</DialogTitle>
+              </DialogHeader>
+              <TabsContent className="grid gap-5 mt-0" value="Geral">
+                <div className="grid grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="access_allowed"
+                    render={({ field }) => (
+                      <FormItem
+                        className={`flex flex-row-reverse items-center justify-end gap-3 ${
+                          form.getValues().test_period_active
+                            ? "opacity-50"
+                            : ""
+                        }`}
+                      >
+                        <FormLabel>Acesso Permitido</FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            disabled={form.getValues().test_period_active}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
 
-              <FormField
-                control={form.control}
-                name="document"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Documento</FormLabel>
-                    <FormControl>
-                      <Input
-                        mask={documentMask}
-                        onInput={handleDocumentInput}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="test_period_active"
+                    render={({ field }) => (
+                      <FormItem
+                        className={`flex flex-row-reverse items-center justify-end gap-3 ${
+                          form.getValues().access_allowed ? "opacity-50" : ""
+                        }`}
+                      >
+                        <FormLabel>Período de Teste Ativo</FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            disabled={form.getValues().access_allowed}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="id_machine"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ID Machine</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
 
-            <div className="flex gap-5">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
+                  <FormField
+                    control={form.control}
+                    name="document"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Documento</FormLabel>
+                        <FormControl>
+                          <Input
+                            mask={documentMask}
+                            onInput={handleDocumentInput}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
 
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input mask="(___) _ ____-____" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
 
-            <div className="flex gap-5">
-              <FormField
-                control={form.control}
-                name="neighborhood"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bairro</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                          <Input mask="(___) _ ____-____" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
+              </TabsContent>
+              <TabsContent className="grid gap-5 mt-0" value="Informaçõoes">
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="neighborhood"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
 
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
 
-            <div
-              className="grid gap-5"
-              style={{ gridTemplateColumns: "1fr 120px" }}
-            >
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Endereço</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Endereço</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
 
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
-            <div className="flex gap-5">
-              <FormField
-                control={form.control}
-                name="complement"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Complemento</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
-            <div className="grid grid-cols-2">
-              <FormField
-                control={form.control}
-                name="access_allowed"
-                render={({ field }) => (
-                  <FormItem
-                    className={`flex flex-row-reverse items-center justify-end gap-3 ${
-                      form.getValues().test_period_active ? "opacity-50" : ""
-                    }`}
-                  >
-                    <FormLabel>Acesso Permitido</FormLabel>
-                    <FormControl>
-                      <Checkbox
-                        disabled={form.getValues().test_period_active}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-
-              <FormField
-                control={form.control}
-                name="test_period_active"
-                render={({ field }) => (
-                  <FormItem
-                    className={`flex flex-row-reverse items-center justify-end gap-3 ${
-                      form.getValues().access_allowed ? "opacity-50" : ""
-                    }`}
-                  >
-                    <FormLabel>Período de Teste Ativo</FormLabel>
-                    <FormControl>
-                      <Checkbox
-                        disabled={form.getValues().access_allowed}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-            </div>
-            <DialogFooter>
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
+                <div className="flex gap-5">
+                  <FormField
+                    control={form.control}
+                    name="complement"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                </div>
+              </TabsContent>
+            </Tabs>
+            <DialogFooter className="mt-5">
               <Button
+                className="mt-2 sm:mt-0"
                 variant="secondary"
                 type="button"
                 onClick={() => {

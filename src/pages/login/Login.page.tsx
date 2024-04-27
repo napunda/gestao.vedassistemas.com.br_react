@@ -12,11 +12,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import useAuthStore from "@/stores/AuthStore";
 import { axiosGuestService } from "@/services/axiosGuest.service";
-import { useEffect } from "react";
-import { User2Icon, LockIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User2Icon, LockIcon, Loader2Icon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
@@ -33,6 +33,8 @@ export const LoginPage = () => {
   const authStore = useAuthStore();
   const navigate = useNavigate();
 
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+
   useEffect(() => {
     const isAuthenticated = authStore.isAuthenticated;
     if (isAuthenticated) {
@@ -41,6 +43,7 @@ export const LoginPage = () => {
   }, [authStore.isAuthenticated, navigate]);
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
+    setLoadingSubmit(true);
     axiosGuestService
       .post("/login", {
         ...values,
@@ -59,22 +62,23 @@ export const LoginPage = () => {
         }
         authStore.login(response.data.access_token);
       })
-      .finally(() => {
-        if (authStore.isAuthenticated && authStore.user) {
-          navigate("/");
-        }
-      })
       .catch(() => {
         toast({
           title: "Erro ao efetuar login",
           description: "Verifique suas credenciais e tente novamente.",
           variant: "destructive",
         });
+      })
+      .finally(() => {
+        if (authStore.isAuthenticated && authStore.user) {
+          navigate("/");
+        }
+        setLoadingSubmit(false);
       });
   }
 
   return (
-    <div className="h-screen w-full grid place-items-center">
+    <div className="h-screen w-full grid place-items-center px-3 sm:px-0">
       <div className="w-full max-w-[25rem] border shadow-sm p-8 rounded-md">
         <h1 className="text-2xl font-bold mb-4">Login</h1>
         <Form {...form}>
@@ -118,13 +122,18 @@ export const LoginPage = () => {
               )}
             ></FormField>
             <div className="mt-4 flex justify-end gap-5 items-center">
-              {/* <Link
+              <Link
                 className="text-sm hover:underline transition-all duration-200"
                 to="/"
               >
                 Esqueci minha senha
-              </Link> */}
-              <Button type="submit">Entrar</Button>
+              </Link>
+              <Button type="submit" disabled={loadingSubmit}>
+                {loadingSubmit && (
+                  <Loader2Icon className="size-4 md:size-5 animate-spin inline-block mr-2" />
+                )}
+                Entrar
+              </Button>
             </div>
           </form>
         </Form>

@@ -6,7 +6,9 @@ import {
   EditIcon,
   ListFilter,
   MoreHorizontal,
+  Phone,
   PlusCircle,
+  PlusIcon,
   Trash2Icon,
   User2Icon,
 } from "lucide-react";
@@ -40,7 +42,6 @@ import {
 } from "@/components/ui/table";
 import { axiosService } from "@/services/axios.service";
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
 import { SkeletonLoading } from "./components/skeleton-loading";
 import { IconButton } from "./components/IconButton";
 import { useSearchParams } from "react-router-dom";
@@ -57,9 +58,13 @@ import {
 import useSearchStore from "@/stores/SerchStore";
 import { ModalUpdateCompany } from "./components/ModalUpdateCompany";
 import { ModalDeleteCompany } from "./components/ModalDeleteCompany";
+import { Input } from "@/components/ui/input";
+import { SkeletonCardLoading } from "./components/skeleton-card-loading";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
+  const [testingPeriodLimitDays, setTestingPeriodLimitDays] =
+    useState<number>(0);
   const searchStore = useSearchStore();
 
   const [companiesResponse, setCompaniesResponse] =
@@ -75,6 +80,7 @@ export function HomePage() {
   const [totalPages, setTotalPages] = useState<number>();
 
   const fetchCompanies = async () => {
+    setLoadingCompanies(true);
     const params = new URLSearchParams();
 
     if (companiesFilter) {
@@ -86,15 +92,18 @@ export function HomePage() {
     params.append("q", searchStore.q);
 
     try {
-      setLoadingCompanies(true);
+      const testingPeriodLimitDays = (
+        await axiosService.get("/app-config/testing_period_limit_days")
+      ).data;
+      setTestingPeriodLimitDays(Number(testingPeriodLimitDays));
+
       const response = await axiosService.get<CompaniesResponse>("/companies", {
         params,
       });
+      setLoadingCompanies(false);
       setCompaniesResponse(response.data);
       setTotalPages(response.data.last_page);
-      setLoadingCompanies(false);
     } catch (error) {
-      console.error(error);
       setLoadingCompanies(false);
     }
   };
@@ -104,11 +113,15 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetchCompanies();
+    if (companiesFilter != "") {
+      fetchCompanies();
+    }
   }, [companiesFilter]);
 
   useEffect(() => {
-    fetchCompanies();
+    if (page > 0) {
+      fetchCompanies();
+    }
   }, [page]);
 
   useEffect(() => {
@@ -120,22 +133,20 @@ export function HomePage() {
   }, [searchStore.q]);
 
   useEffect(() => {
+    if (searchStore.q === "") {
+      return;
+    }
     companiesFilter
       ? setSearchParams({
           filter: companiesFilter,
-          page: "1",
           q: searchStore.q,
         })
-      : setSearchParams({ page: "1", q: searchStore.q });
+      : setSearchParams({ q: searchStore.q });
   }, [searchStore.q]);
 
   useEffect(() => {
     searchStore.setQ(searchParams.get("q") ?? "");
   }, []);
-
-  const formatDate = (date: Date) => {
-    return dayjs(date).format("DD/MM/YYYY");
-  };
 
   const handleCompaniesFilterChange = (value: string) => {
     setCompaniesFilter(value);
@@ -180,16 +191,62 @@ export function HomePage() {
     setOpenModalDeleteCompany(true);
   };
 
+  const handleSetPage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPage = Number(e.target.value);
+
+    if (!totalPages) {
+      return;
+    }
+    if (newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  const calculateTestRemainingDays = (startTestPeriodAt: Date) => {
+    if (startTestPeriodAt) {
+      const today = new Date();
+      const startDate = new Date(startTestPeriodAt);
+      const totalTestDays = testingPeriodLimitDays;
+
+      const diffTime = Math.abs(today.getTime() - startDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      const remainingDays = totalTestDays - diffDays;
+
+      if (remainingDays < 0) {
+        return 0;
+      }
+
+      return remainingDays;
+    }
+    return null;
+  };
+
+  const formatDocument = (document: string) => {
+    if (document.length === 11) {
+      return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    } else {
+      return document.replace(
+        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+        "$1.$2.$3/$4-$5"
+      );
+    }
+  };
+
   return (
     <div className="flex sm:min-h-screen w-full flex-col bg-muted/40 overflow-x-auto">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="flex items-center relative md:py-0 py-4">
-            <div className="md:ml-auto flex items-center gap-2 fixed md:static z-20">
+          <div className="flex items-center md:py-0 py-4 fixed lg:static bottom-10 right-10 z-20">
+            <div className="lg:ml-auto flex items-center gap-2 ">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7 gap-1">
-                    <ListFilter className="h-3.5 w-3.5" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="size-9 lg:h-7 lg:w-auto gap-1 rounded-full lg:rounded"
+                  >
+                    <ListFilter className="size-3.5" />
                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                       Filtro
                     </span>
@@ -224,10 +281,11 @@ export function HomePage() {
                   setOpenModalAddCompany(true);
                 }}
                 size="sm"
-                className="h-7 gap-1"
+                className="size-12 lg:h-7 lg:w-auto gap-1 rounded-full lg:rounded bg-primary hover:bg-primary-dark transition-all duration-200"
               >
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                <PlusCircle className="size-3.5 hidden lg:block" />
+                <PlusIcon className="lg:hidden block" />
+                <span className="sr-only lg:not-sr-only sm:whitespace-nowrap">
                   Nova empresa
                 </span>
               </Button>
@@ -240,8 +298,8 @@ export function HomePage() {
                 Gerencie suas empresas associadas ou adicone mais.
               </CardDescription>
             </CardHeader>
-            <CardContent className="overflow-auto relative">
-              <Table className="table-auto xl:table-fixed">
+            <CardContent className="overflow-auto relative hidden lg:block">
+              <Table className="table-auto">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="hidden sm:table-cell">
@@ -249,16 +307,17 @@ export function HomePage() {
                     </TableHead>
                     <TableHead>Nome</TableHead>
                     <TableHead>Documento</TableHead>
-                    <TableHead>Liberado</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-balance">Teste ativo</TableHead>
                     <TableHead className="text-balance">
-                      Período de Teste
+                      Dias restante
                     </TableHead>
                     <TableHead>Endereço</TableHead>
                     <TableHead>Bairro</TableHead>
                     <TableHead>Cidade</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Telefone</TableHead>
-                    <TableHead>Criado em</TableHead>
+
                     <TableHead>
                       <span className="sr-only">Ações</span>
                     </TableHead>
@@ -274,14 +333,16 @@ export function HomePage() {
                           <User2Icon className="size-6" />
                         </TableCell>
                         <TableCell>{company.name}</TableCell>
-                        <TableCell>{company.document}</TableCell>
+                        <TableCell>
+                          {formatDocument(company.document)}
+                        </TableCell>
                         <TableCell>
                           <Badge
                             variant={
                               company.access_allowed ? "outline" : "secondary"
                             }
                           >
-                            {company.access_allowed ? "Sim" : "Não"}
+                            {company.access_allowed ? "Ativo" : "Inativo"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -292,15 +353,31 @@ export function HomePage() {
                                 : "secondary"
                             }
                           >
-                            {company.test_period_active ? "Ativo" : "Inativo"}
+                            {company.test_period_active ? "Sim" : "Não"}
                           </Badge>
                         </TableCell>
-                        <TableCell>{company.address}</TableCell>
-                        <TableCell>{company.neighborhood}</TableCell>
-                        <TableCell>{company.city}</TableCell>
-                        <TableCell>{company.state}</TableCell>
-                        <TableCell>{company.phone}</TableCell>
-                        <TableCell>{formatDate(company.created_at)}</TableCell>
+                        <TableCell>
+                          {company.start_test_period_at
+                            ? calculateTestRemainingDays(
+                                company.start_test_period_at
+                              )
+                            : null}
+                        </TableCell>
+                        <TableCell>
+                          <p className="line-clamp-2">{company.address}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="line-clamp-2">{company.neighborhood}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="whitespace-nowrap">{company.city}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="whitespace-nowrap">{company.state}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="whitespace-nowrap">{company.phone}</p>
+                        </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -342,14 +419,129 @@ export function HomePage() {
                 </TableBody>
               </Table>
             </CardContent>
+            <CardContent className="overflow-hidden relative lg:hidden space-y-5">
+              {loadingCompanies ? (
+                <>
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                  <SkeletonCardLoading />
+                </>
+              ) : (
+                companiesResponse?.data.map((company) => (
+                  <Card className="rounded" key={company.id}>
+                    <CardHeader className="flex justify-between flex-row items-start border-b py-3">
+                      <CardTitle className="text-sm font-bold">
+                        {formatDocument(company.document)}
+                      </CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <MoreHorizontal className="size-4 cursor-pointer" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel className="font-bold">
+                            Ações
+                          </DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleOpenUpdateModal(company);
+                            }}
+                          >
+                            <EditIcon size={14} />
+                            <span className="ml-2">Editar</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleDeleteCompany(company);
+                            }}
+                          >
+                            <Trash2Icon size={14} />
+                            <span className="ml-2">Deletar</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </CardHeader>
+
+                    <CardContent className="py-3">
+                      <div className="flex items-start flex-row justify-between">
+                        <div className="flex items-center gap-4">
+                          <User2Icon className="size-10 p-2 border rounded-full" />
+                          <div className="grid gap-1">
+                            <span className="font-bold">{company.name}</span>
+                            <a
+                              href={`tel:${company.phone}`}
+                              className="flex items-center gap-2"
+                            >
+                              <Phone className="size-3" />
+                              <span className="text-xs text-muted-foreground">
+                                {company.phone}
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={
+                            company.access_allowed ? "outline" : "secondary"
+                          }
+                        >
+                          {company.access_allowed ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                      <div className="mt-8 grid">
+                        <div className="flex justify-between">
+                          <span>Estado</span>
+                          <p className="line-clamp-2 text-sm text-muted-foreground">
+                            {company.state}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Cidade</span>
+                          <p className="line-clamp-2 text-sm text-muted-foreground">
+                            {company.city}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t pt-5 grid gap-3">
+                      <div className="flex justify-between">
+                        <span>Período de teste</span>
+                        <Badge
+                          variant={
+                            company.test_period_active ? "default" : "secondary"
+                          }
+                        >
+                          {company.test_period_active ? "Sim" : "Não"}
+                        </Badge>
+                      </div>
+                      {company.start_test_period_at &&
+                      company.test_period_active ? (
+                        <div className="flex justify-between">
+                          <span>Tempo restantes</span>
+                          <p className="text-sm text-muted-foreground">
+                            {calculateTestRemainingDays(
+                              company.start_test_period_at
+                            )}{" "}
+                            dias
+                          </p>
+                        </div>
+                      ) : null}
+                    </CardFooter>
+                  </Card>
+                ))
+              )}
+            </CardContent>
             <CardFooter>
-              <div className="flex justify-between items-center w-full text-muted-foreground">
+              <div className="md:flex hidden justify-between items-center w-full text-muted-foreground">
                 <div className="text-sm">
                   Mostrando {companiesResponse?.data.length} de{" "}
                   {companiesResponse?.total} itens
                 </div>
 
-                <div className="inline-flex items-center gap-8 text-sm font-bold">
+                <div className="inline-flex items-center gap-6 text-xs lg:gap-8 lg:text-sm font-bold">
                   <div className="mr-8 flex items-center gap-2">
                     <span className="text-white font-semibold">
                       Itens por página
@@ -405,6 +597,28 @@ export function HomePage() {
                     </IconButton>
                   </div>
                 </div>
+              </div>
+              <div className="mt-6 flex items-center gap-3 sm:gap-5 mx-auto text-xs sm:text-sm md:hidden ">
+                <IconButton
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="size-4 sm:size-6" />
+                </IconButton>
+                <span>Página</span>
+                <Input
+                  className="w-10 sm:w-12 text-center text-xs sm:text-sm"
+                  onChange={handleSetPage}
+                  value={page}
+                />
+                <span>de</span>
+                <span>{totalPages}</span>
+                <IconButton
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  <ChevronRight className="size-4 sm:size-6" />
+                </IconButton>
               </div>
             </CardFooter>
           </Card>

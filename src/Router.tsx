@@ -31,28 +31,6 @@ const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
-  /* {
-    path: "/dashboard",
-    element: <AuthenticatedLayout />,
-    children: [
-      {
-        path: "/dashboard",
-        element: (
-          <PrivateRoute>
-            <HomePage />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "/dashboard/settings",
-        element: (
-          <PrivateRoute>
-            <Settings />
-          </PrivateRoute>
-        ),
-      },
-    ],
-  }, */
 
   {
     path: "/",

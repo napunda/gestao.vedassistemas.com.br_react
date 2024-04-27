@@ -12,6 +12,7 @@ export interface Companies {
   state?: string | null;
   phone?: string | null;
   created_at: Date;
+  start_test_period_at?: Date | null;
 }
 
 export interface CompaniesResponse {
