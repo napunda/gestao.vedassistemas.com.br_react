@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { loginSchema } from "@/schemes/LoginSchema";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -12,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuthStore from "@/stores/AuthStore";
 import { axiosGuestService } from "@/services/axiosGuest.service";
 import { useEffect, useState } from "react";
@@ -25,8 +26,9 @@ export const LoginPage = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: "fiscalvedas@gmail.com",
+      password: "napunda23",
+      keepConnected: false,
     },
   });
 
@@ -121,13 +123,25 @@ export const LoginPage = () => {
                 </FormItem>
               )}
             ></FormField>
+            <FormField
+              control={form.control}
+              name="keepConnected"
+              render={({ field }) => (
+                <FormItem className="flex flex-row-reverse items-center justify-end gap-2 -mt-2">
+                  <FormLabel className="cursor-pointer">
+                    Mantenha-me conectado
+                  </FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            ></FormField>
             <div className="mt-4 flex justify-end gap-5 items-center">
-              <Link
-                className="text-sm hover:underline transition-all duration-200"
-                to="/"
-              >
-                Esqueci minha senha
-              </Link>
               <Button type="submit" disabled={loadingSubmit}>
                 {loadingSubmit && (
                   <Loader2Icon className="size-4 md:size-5 animate-spin inline-block mr-2" />

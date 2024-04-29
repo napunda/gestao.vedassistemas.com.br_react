@@ -236,8 +236,8 @@ export function HomePage() {
   return (
     <div className="flex sm:min-h-screen w-full flex-col bg-muted/40 overflow-x-auto">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="flex items-center md:py-0 py-4 fixed lg:static bottom-10 right-10 z-20">
+        <main className="grid flex-1 items-start gap-4 px-4 pt-4 pb-20 sm:px-6 sm:py-0 md:gap-8">
+          <div className="flex items-center lg:py-0 py-4 fixed lg:static bottom-0 right-0 px-4 z-20">
             <div className="lg:ml-auto flex items-center gap-2 ">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -419,7 +419,7 @@ export function HomePage() {
                 </TableBody>
               </Table>
             </CardContent>
-            <CardContent className="overflow-hidden relative lg:hidden space-y-5">
+            <CardContent className="overflow-hidden relative lg:hidden space-y-5 p-2 sm:p-6">
               {loadingCompanies ? (
                 <>
                   <SkeletonCardLoading />

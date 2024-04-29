@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, Settings, LogOut } from "lucide-react";
+import { Home, Settings, LogOut, Users2 } from "lucide-react";
 import {
   TooltipProvider,
   Tooltip,
@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "@/stores/AuthStore";
+import { use } from "i18next";
 export const Aside = () => {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 py-4">
@@ -20,6 +21,22 @@ export const Aside = () => {
           <Home className="h-4 w-4 transition-all group-hover:scale-110" />
           <span className="sr-only">Home</span>
         </Link>
+        {user?.is_admin ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/dashboard/users"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                >
+                  <Users2 className="size-5" />
+                  <span className="sr-only">Usuários</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Usuários</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : null}
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 py-4">
         <TooltipProvider>

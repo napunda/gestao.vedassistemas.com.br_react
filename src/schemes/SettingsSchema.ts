@@ -14,12 +14,12 @@ export const settingsSchema = z
   .refine(
     (values) => {
       if (values.password && values.password_confirmation) {
-        return values.password.length >= 6;
+        return values.password.length >= 8;
       }
       return true;
     },
     {
-      message: "A senha deve ter no mínimo 6 caracteres",
+      message: "A senha deve ter no mínimo 8 caracteres",
       path: ["password"],
     }
   )
