@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "@/stores/AuthStore";
-import { use } from "i18next";
+
 export const Aside = () => {
   const { logout, user } = useAuthStore();
   return (
