@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import { HomePage } from "./pages/home";
 import { Settings } from "./pages/settings";
+import { UsersPage } from "./pages/users";
 import { LoginPage } from "./pages/login";
 import { GuessLayout } from "./components/GuessLayout";
 import PrivateRoute from "./PrivateRoute";
@@ -28,6 +29,14 @@ const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Settings />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/users",
+    element: (
+      <PrivateRoute adminRoute>
+        <UsersPage />
       </PrivateRoute>
     ),
   },

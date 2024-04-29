@@ -5,9 +5,10 @@ import { AuthenticatedLayout } from "./components/authenticated-layout";
 
 interface PrivateRouteProps {
   children: ReactElement;
+  adminRoute?: boolean;
 }
 
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
+const PrivateRoute = ({ children, adminRoute }: PrivateRouteProps) => {
   const authStore = useAuthStore();
   const isAuthenticated = authStore.isAuthenticated;
   const location = useLocation();
@@ -28,6 +29,9 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (adminRoute && !authStore.user?.is_admin) {
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return <AuthenticatedLayout>{children}</AuthenticatedLayout>;
