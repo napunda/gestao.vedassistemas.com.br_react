@@ -53,7 +53,7 @@ export const Header = () => {
   const handleLogoutClick = () => {
     authStore.logout();
   };
-
+//@ts-ignore
   let [searchParams, setSearchParams] = useSearchParams();
   const handleInputSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     searchStore.setQ(e.target.value);
