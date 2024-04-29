@@ -26,8 +26,8 @@ export const LoginPage = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "fiscalvedas@gmail.com",
-      password: "napunda23",
+      email: "",
+      password: "",
       keepConnected: false,
     },
   });
