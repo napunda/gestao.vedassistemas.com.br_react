@@ -28,6 +28,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Companies } from "../interfaces/companies";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useAuthStore from "@/stores/AuthStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users } from "@/pages/users/interfaces/users";
 
 interface ModalAddCompanyProps {
   open: boolean;
@@ -55,11 +64,14 @@ export const ModalUpdateCompany = ({
       complement: company.complement ?? "",
       access_allowed: !!company.access_allowed,
       test_period_active: !!company.test_period_active,
+      user_id: company.id_user.toString() ?? "1",
     },
   });
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuthStore();
+  const [users, setUsers] = useState<Users[]>([]);
 
   function onSubmit(data: z.infer<typeof AddCompanySchema>) {
     setLoadingSubmit(true);
@@ -108,6 +120,26 @@ export const ModalUpdateCompany = ({
       return;
     }
   }, [open]);
+
+  const fetchUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("returnAll", "true");
+
+      const response = await axiosService.get<Users[]>("/users", {
+        params,
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      fetchUsers();
+    }
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -172,6 +204,41 @@ export const ModalUpdateCompany = ({
                     )}
                   ></FormField>
                 </div>
+                {user?.is_admin ? (
+                  <div className="grid grid-cols-1">
+                    <FormField
+                      control={form.control}
+                      name="user_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Usuário</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value?.toString()}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um usuário a essa empresa" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {users?.map((user) => (
+                                <SelectItem
+                                  key={user.id}
+                                  value={user.id.toString()}
+                                >
+                                  {user.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    ></FormField>
+                  </div>
+                ) : null}
                 <div className="grid sm:grid-cols-2 gap-5">
                   <FormField
                     control={form.control}

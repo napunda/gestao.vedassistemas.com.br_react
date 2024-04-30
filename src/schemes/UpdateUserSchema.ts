@@ -6,6 +6,7 @@ export const UpdateUserSchema = z
     name: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
     password: z.string().optional(),
     web_password: z.string().optional(),
+    user_id: z.number().optional(),
   })
   .refine(
     (values) => {

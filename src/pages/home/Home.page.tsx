@@ -10,7 +10,7 @@ import {
   PlusCircle,
   PlusIcon,
   Trash2Icon,
-  User2Icon,
+  ChefHatIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -330,7 +330,7 @@ export function HomePage() {
                     companiesResponse?.data.map((company) => (
                       <TableRow key={company.id}>
                         <TableCell className="hidden sm:table-cell">
-                          <User2Icon className="size-6" />
+                          <ChefHatIcon className="size-6" />
                         </TableCell>
                         <TableCell>{company.name}</TableCell>
                         <TableCell>
@@ -357,7 +357,8 @@ export function HomePage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {company.start_test_period_at
+                          {company.start_test_period_at &&
+                          company.test_period_active
                             ? calculateTestRemainingDays(
                                 company.start_test_period_at
                               )
@@ -469,7 +470,7 @@ export function HomePage() {
                     <CardContent className="py-3">
                       <div className="flex items-start flex-row justify-between">
                         <div className="flex items-center gap-4">
-                          <User2Icon className="size-10 p-2 border rounded-full" />
+                          <ChefHatIcon className="size-10 p-2 border rounded-full" />
                           <div className="grid gap-1">
                             <span className="font-bold">{company.name}</span>
                             <a

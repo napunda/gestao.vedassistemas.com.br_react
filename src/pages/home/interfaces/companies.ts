@@ -1,6 +1,7 @@
 export interface Companies {
   id: number;
   id_machine: string;
+  id_user: number;
   document: string;
   access_allowed: boolean;
   test_period_active: boolean;

@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ChefHatIcon,
   Home,
   LogOutIcon,
   PanelLeft,
@@ -53,7 +54,7 @@ export const Header = () => {
   const handleLogoutClick = () => {
     authStore.logout();
   };
-//@ts-ignore
+  //@ts-ignore
   let [searchParams, setSearchParams] = useSearchParams();
   const handleInputSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     searchStore.setQ(e.target.value);
@@ -117,11 +118,20 @@ export const Header = () => {
                   <Home className="size-5" />
                   Dashboard
                 </Link>
+                {authStore.user?.is_admin ? (
+                  <Link
+                    to="/dashboard/users"
+                    className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Users2 className="size-5" />
+                    Usuários
+                  </Link>
+                ) : null}
                 <Link
                   to="/dashboard"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
-                  <Users2 className="size-5" />
+                  <ChefHatIcon className="size-5" />
                   Empresas
                 </Link>
                 <Link

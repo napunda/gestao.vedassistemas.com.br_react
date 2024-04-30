@@ -21,6 +21,7 @@ export const AddCompanySchema = z
     phone: z.string().optional(),
     access_allowed: z.boolean().default(false).optional(),
     test_period_active: z.boolean().default(false).optional(),
+    user_id: z.string().optional(),
   })
   .refine(
     ({ address }) => {

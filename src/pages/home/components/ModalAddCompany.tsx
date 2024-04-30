@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { AddCompanySchema } from "@/schemes/AddCompanySchema";
 import {
@@ -27,8 +27,16 @@ import { cpf } from "cpf-cnpj-validator";
 import { Loader2Icon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users } from "@/pages/users/interfaces/users";
+import useAuthStore from "@/stores/AuthStore";
 
 interface ModalAddCompanyProps {
   open: boolean;
@@ -40,6 +48,11 @@ export const ModalAddCompany = ({
   onClose,
   onAddCompany,
 }: ModalAddCompanyProps) => {
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuthStore();
+  const [users, setUsers] = useState<Users[]>();
+
   const form = useForm<z.infer<typeof AddCompanySchema>>({
     resolver: zodResolver(AddCompanySchema),
     defaultValues: {
@@ -54,11 +67,9 @@ export const ModalAddCompany = ({
       phone: "",
       access_allowed: false,
       test_period_active: true,
+      user_id: "1",
     },
   });
-
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const { toast } = useToast();
 
   function onSubmit(data: z.infer<typeof AddCompanySchema>) {
     setLoadingSubmit(true);
@@ -95,6 +106,26 @@ export const ModalAddCompany = ({
         setLoadingSubmit(false);
       });
   }
+
+  const fetchUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("returnAll", "true");
+
+      const response = await axiosService.get<Users[]>("/users", {
+        params,
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      fetchUsers();
+    }
+  }, []);
 
   const [documentMask, setDocumentMask] =
     useState<string>("__.___.___/____-__");
@@ -174,6 +205,42 @@ export const ModalAddCompany = ({
                     )}
                   ></FormField>
                 </div>
+                {user?.is_admin ? (
+                  <div className="grid grid-cols-1">
+                    <FormField
+                      control={form.control}
+                      name="user_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Usuário</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um usuário a essa empresa" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {users?.map((user) => (
+                                <SelectItem
+                                  key={user.id}
+                                  value={user.id.toString()}
+                                >
+                                  {user.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    ></FormField>
+                  </div>
+                ) : null}
+
                 <div className="grid sm:grid-cols-2 gap-5">
                   <FormField
                     control={form.control}
