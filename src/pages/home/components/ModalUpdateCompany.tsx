@@ -43,12 +43,14 @@ interface ModalAddCompanyProps {
   onClose: () => void;
   onUpdateCompany: () => void;
   company: Companies;
+  users?: Users[];
 }
 export const ModalUpdateCompany = ({
   open,
   onClose,
   onUpdateCompany,
   company,
+  users,
 }: ModalAddCompanyProps) => {
   const form = useForm<z.infer<typeof AddCompanySchema>>({
     resolver: zodResolver(AddCompanySchema),
@@ -71,7 +73,6 @@ export const ModalUpdateCompany = ({
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const { toast } = useToast();
   const { user } = useAuthStore();
-  const [users, setUsers] = useState<Users[]>([]);
 
   function onSubmit(data: z.infer<typeof AddCompanySchema>) {
     setLoadingSubmit(true);
@@ -120,26 +121,6 @@ export const ModalUpdateCompany = ({
       return;
     }
   }, [open]);
-
-  const fetchUsers = async () => {
-    try {
-      const params = new URLSearchParams();
-      params.append("returnAll", "true");
-
-      const response = await axiosService.get<Users[]>("/users", {
-        params,
-      });
-      setUsers(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    if (user?.is_admin) {
-      fetchUsers();
-    }
-  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

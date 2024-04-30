@@ -42,16 +42,17 @@ interface ModalAddCompanyProps {
   open: boolean;
   onClose: () => void;
   onAddCompany: () => void;
+  users?: Users[];
 }
 export const ModalAddCompany = ({
   open,
   onClose,
   onAddCompany,
+  users,
 }: ModalAddCompanyProps) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const { toast } = useToast();
   const { user } = useAuthStore();
-  const [users, setUsers] = useState<Users[]>();
 
   const form = useForm<z.infer<typeof AddCompanySchema>>({
     resolver: zodResolver(AddCompanySchema),
@@ -106,26 +107,6 @@ export const ModalAddCompany = ({
         setLoadingSubmit(false);
       });
   }
-
-  const fetchUsers = async () => {
-    try {
-      const params = new URLSearchParams();
-      params.append("returnAll", "true");
-
-      const response = await axiosService.get<Users[]>("/users", {
-        params,
-      });
-      setUsers(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    if (user?.is_admin) {
-      fetchUsers();
-    }
-  }, []);
 
   const [documentMask, setDocumentMask] =
     useState<string>("__.___.___/____-__");

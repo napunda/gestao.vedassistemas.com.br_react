@@ -60,6 +60,8 @@ import { ModalUpdateCompany } from "./components/ModalUpdateCompany";
 import { ModalDeleteCompany } from "./components/ModalDeleteCompany";
 import { Input } from "@/components/ui/input";
 import { SkeletonCardLoading } from "./components/skeleton-card-loading";
+import { Users } from "../users/interfaces/users";
+import useAuthStore from "@/stores/AuthStore";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
@@ -232,6 +234,29 @@ export function HomePage() {
       );
     }
   };
+
+  const [users, setUsers] = useState<Users[]>();
+  const { user } = useAuthStore();
+
+  const fetchUsers = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("returnAll", "true");
+
+      const response = await axiosService.get<Users[]>("/users", {
+        params,
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      fetchUsers();
+    }
+  }, [user]);
 
   return (
     <div className="flex sm:min-h-screen w-full flex-col bg-muted/40 overflow-x-auto">
@@ -626,6 +651,7 @@ export function HomePage() {
         </main>
       </div>
       <ModalAddCompany
+        users={users}
         open={openModalAddCompany}
         onAddCompany={fetchCompanies}
         onClose={onCloseModalAddCompany}
@@ -633,6 +659,7 @@ export function HomePage() {
 
       {companyToUpdate && (
         <ModalUpdateCompany
+          users={users}
           open={openModalUpdateCompany}
           onUpdateCompany={() => {
             fetchCompanies();
