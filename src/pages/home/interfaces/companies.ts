@@ -12,6 +12,7 @@ export interface Companies {
   city?: string | null;
   state?: string | null;
   phone?: string | null;
+  last_activity_at?: Date | null;
   created_at: Date;
   start_test_period_at?: Date | null;
 }

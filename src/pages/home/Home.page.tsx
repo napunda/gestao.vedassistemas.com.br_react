@@ -4,7 +4,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   EditIcon,
-  ListFilter,
   MoreHorizontal,
   Phone,
   PlusCircle,
@@ -17,6 +16,10 @@ import {
   ArrowUpNarrowWideIcon,
   ArrowDownNarrowWideIcon,
   EyeIcon,
+  FileIcon,
+  Loader2Icon,
+  FilterIcon,
+  FilterXIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,8 +71,10 @@ import { Input } from "@/components/ui/input";
 import { SkeletonCardLoading } from "./components/SkeletonCardLoading";
 import { Users } from "../users/interfaces/users";
 import useAuthStore from "@/stores/AuthStore";
-import { use } from "i18next";
 import { DrawerViewCompany } from "./components/DrawerViewCompany";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { CompaniesPDF } from "./components/CompaniesPDF";
+import dayjs from "dayjs";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
@@ -244,6 +249,19 @@ export function HomePage() {
     return null;
   };
 
+  const calculateNotActivityDays = (lastActivityAt: Date | null) => {
+    if (lastActivityAt) {
+      const today = new Date();
+      const lastActivityDate = new Date(lastActivityAt);
+
+      const diffTime = Math.abs(today.getTime() - lastActivityDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return diffDays;
+    }
+    return 0;
+  };
+
   const formatDocument = (document: string) => {
     if (document.length === 11) {
       return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -340,6 +358,10 @@ export function HomePage() {
         label: "Dias restantes",
       },
       {
+        field: "last_activity_at",
+        label: "Dias sem atividade",
+      },
+      {
         field: "city",
         label: "Cidade",
       },
@@ -399,41 +421,7 @@ export function HomePage() {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 px-4 pt-4 pb-20 sm:px-6 sm:py-0 md:gap-8">
           <div className="flex items-center">
-            <div className="lg:ml-auto flex items-center gap-2 ">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 w-auto gap-1 lg:rounded"
-                  >
-                    <ListFilter className="size-3.5" />
-                    <span className="sm:whitespace-nowrap">Filtro</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mostrar</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuRadioGroup
-                    value={companiesFilter}
-                    onValueChange={handleCompaniesFilterChange}
-                  >
-                    <DropdownMenuRadioItem value="all">
-                      Todos
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="allowed">
-                      Liberado
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="testPeriod">
-                      Período de teste
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="notAllowed">
-                      Não liberado
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="lg:ml-auto flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -484,6 +472,70 @@ export function HomePage() {
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="phone">
                       Telefone
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 w-auto gap-1 lg:rounded"
+              >
+                {loadingCompanies ? (
+                  <div className="flex gap-2">
+                    <Loader2Icon className="size-3.5 animate-spin inline-block" />
+                    <span>Exportar</span>
+                  </div>
+                ) : (
+                  companiesResponse && (
+                    <PDFDownloadLink
+                      fileName="Lista de empresas"
+                      document={
+                        <CompaniesPDF companies={companiesResponse.data} />
+                      }
+                    >
+                      <div className="flex gap-2">
+                        <FileIcon className="size-3.5" />
+                        <span>Exportar</span>
+                      </div>
+                    </PDFDownloadLink>
+                  )
+                )}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-auto gap-1 lg:rounded"
+                  >
+                    {!companiesFilter || companiesFilter == "all" ? (
+                      <FilterIcon className="size-3.5" />
+                    ) : (
+                      <FilterXIcon className="size-3.5" />
+                    )}
+                    <span className="sm:whitespace-nowrap">Filtro</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Mostrar</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuRadioGroup
+                    value={companiesFilter}
+                    onValueChange={handleCompaniesFilterChange}
+                  >
+                    <DropdownMenuRadioItem value="all">
+                      Todos
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="allowed">
+                      Liberado
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="testPeriod">
+                      Período de teste
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="notAllowed">
+                      Não liberado
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
@@ -554,6 +606,15 @@ export function HomePage() {
                                 company.start_test_period_at
                               )
                             : null}
+                        </TableCell>
+                        <TableCell>
+                          <p className="whitespace-nowrap">
+                            {company.last_activity_at
+                              ? calculateNotActivityDays(
+                                  company.last_activity_at
+                                )
+                              : 0}
+                          </p>
                         </TableCell>
                         <TableCell>
                           <p className="whitespace-nowrap">{company.city}</p>
@@ -834,7 +895,6 @@ export function HomePage() {
         onAddCompany={fetchCompanies}
         onClose={onCloseModalAddCompany}
       />
-
       {companyToUpdate && (
         <ModalUpdateCompany
           users={users}
@@ -847,7 +907,6 @@ export function HomePage() {
           company={companyToUpdate}
         />
       )}
-
       {companyToDelete && (
         <ModalDeleteCompany
           company={companyToDelete}
@@ -859,7 +918,6 @@ export function HomePage() {
           }}
         />
       )}
-
       {companyToView && (
         <DrawerViewCompany
           company={companyToView}
@@ -867,7 +925,6 @@ export function HomePage() {
           open={openDrawerViewCompany}
         />
       )}
-
       <Button
         className={`fixed rounded-full lg:hidden w-8 right-2 p-0 bottom-2 transition-all duration-150 ${
           !showScrollToTopButton
