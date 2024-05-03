@@ -26,7 +26,7 @@ export const LoginPage = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
       keepConnected: false,
     },
@@ -87,15 +87,15 @@ export const LoginPage = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
             <FormField
               control={form.control}
-              name="email"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+                  <FormLabel>Usuário</FormLabel>
                   <FormControl>
                     <Input
                       icon={<User2Icon size={16} />}
                       iconPosition="left"
-                      placeholder="E-mail"
+                      placeholder="Usuário"
                       {...field}
                     />
                   </FormControl>

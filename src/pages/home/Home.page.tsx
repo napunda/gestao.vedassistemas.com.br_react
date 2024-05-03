@@ -11,6 +11,12 @@ import {
   PlusIcon,
   Trash2Icon,
   ChefHatIcon,
+  ChevronUpIcon,
+  ArrowDownUpIcon,
+  ArrowUpDownIcon,
+  ArrowUpNarrowWideIcon,
+  ArrowDownNarrowWideIcon,
+  EyeIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +48,7 @@ import {
 } from "@/components/ui/table";
 import { axiosService } from "@/services/axios.service";
 import { useEffect, useState } from "react";
-import { SkeletonLoading } from "./components/skeleton-loading";
+import { SkeletonLoading } from "./components/SkeletonLoading";
 import { IconButton } from "./components/IconButton";
 import { useSearchParams } from "react-router-dom";
 import { Companies, CompaniesResponse } from "./interfaces/companies";
@@ -59,9 +65,11 @@ import useSearchStore from "@/stores/SerchStore";
 import { ModalUpdateCompany } from "./components/ModalUpdateCompany";
 import { ModalDeleteCompany } from "./components/ModalDeleteCompany";
 import { Input } from "@/components/ui/input";
-import { SkeletonCardLoading } from "./components/skeleton-card-loading";
+import { SkeletonCardLoading } from "./components/SkeletonCardLoading";
 import { Users } from "../users/interfaces/users";
 import useAuthStore from "@/stores/AuthStore";
+import { use } from "i18next";
+import { DrawerViewCompany } from "./components/DrawerViewCompany";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
@@ -78,7 +86,7 @@ export function HomePage() {
   const [page, setPage] = useState<number>(
     searchParams.get("page") ? Number(searchParams.get("page")) : 1
   );
-  const [perPage, setPerPage] = useState<number>(8);
+  const [perPage, setPerPage] = useState<number>(20);
   const [totalPages, setTotalPages] = useState<number>();
 
   const fetchCompanies = async () => {
@@ -87,6 +95,11 @@ export function HomePage() {
 
     if (companiesFilter) {
       params.append("filter", companiesFilter);
+    }
+
+    if (orderBy.field) {
+      params.append("orderBy", orderBy.field);
+      params.append("direction", orderBy.direction);
     }
 
     params.append("page", page.toString());
@@ -166,8 +179,15 @@ export function HomePage() {
   const [openModalAddCompany, setOpenModalAddCompany] = useState(false);
   const [openModalUpdateCompany, setOpenModalUpdateCompany] = useState(false);
   const [openModalDeleteCompany, setOpenModalDeleteCompany] = useState(false);
+  const [openDrawerViewCompany, setOpenDrawerViewCompany] = useState(false);
   const [companyToUpdate, setCompanyToUpdate] = useState<Companies | null>();
   const [companyToDelete, setCompanyToDelete] = useState<Companies | null>();
+  const [companyToView, setCompanyToView] = useState<Companies | null>();
+
+  const handleOpenViewDrawer = (company: Companies) => {
+    setCompanyToView(company);
+    setOpenDrawerViewCompany(true);
+  };
 
   const onCloseModalAddCompany = () => {
     setOpenModalAddCompany(false);
@@ -236,6 +256,7 @@ export function HomePage() {
   };
 
   const [users, setUsers] = useState<Users[]>();
+  const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
   const { user } = useAuthStore();
 
   const fetchUsers = async () => {
@@ -258,27 +279,140 @@ export function HomePage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const scrollListener = () => {
+      if (window.scrollY > document.documentElement.scrollHeight * 0.35) {
+        // 35% da altura da página
+        setShowScrollToTopButton(true);
+      } else {
+        setShowScrollToTopButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", scrollListener);
+
+    return () => {
+      window.removeEventListener("scroll", scrollListener);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  type OrderBy = {
+    field: string;
+    direction: "asc" | "desc";
+  };
+
+  const [orderBy, setOrderBy] = useState<OrderBy>({
+    field: "created_at",
+    direction: "desc",
+  });
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [orderBy]);
+
+  const renderTableHeader = () => {
+    const headers = [
+      {
+        field: "name",
+        label: "Nome",
+      },
+      {
+        field: "document",
+        label: "Documento",
+      },
+      {
+        field: "access_allowed",
+        label: "Status",
+      },
+      {
+        field: "test_period_active",
+        label: "Teste ativo",
+      },
+      {
+        field: "start_test_period_at",
+        label: "Dias restantes",
+      },
+      {
+        field: "city",
+        label: "Cidade",
+      },
+      {
+        field: "state",
+        label: "Estado",
+      },
+      {
+        field: "phone",
+        label: "Telefone",
+      },
+    ];
+
+    return (
+      <TableHeader>
+        <TableRow>
+          <TableHead className="hidden sm:table-cell w-[40px]">
+            <span className="sr-only">Ícone</span>
+          </TableHead>
+          {headers.map((header) => (
+            <TableHead
+              key={header.field}
+              onClick={() =>
+                setOrderBy({
+                  field: header.field,
+                  direction: orderBy.direction === "asc" ? "desc" : "asc",
+                })
+              }
+            >
+              <p
+                className={`${
+                  orderBy.field == header.field
+                    ? "dark:text-white text-black"
+                    : ""
+                } flex gap-2 items-center cursor-pointer`}
+              >
+                <span className="select-none">{header.label}</span>
+                {orderBy.field == header.field &&
+                orderBy.direction == "desc" ? (
+                  <ArrowDownUpIcon size={15} />
+                ) : (
+                  <ArrowUpDownIcon size={15} />
+                )}
+              </p>
+            </TableHead>
+          ))}
+          <TableHead>
+            <span className="sr-only">Ações</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+    );
+  };
+
   return (
     <div className="flex sm:min-h-screen w-full flex-col bg-muted/40 overflow-x-auto">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 px-4 pt-4 pb-20 sm:px-6 sm:py-0 md:gap-8">
-          <div className="flex items-center lg:py-0 py-4 fixed lg:static bottom-0 right-0 px-4 z-20">
+          <div className="flex items-center">
             <div className="lg:ml-auto flex items-center gap-2 ">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="size-9 lg:h-7 lg:w-auto gap-1 rounded-full lg:rounded"
+                    className="h-7 w-auto gap-1 lg:rounded"
                   >
                     <ListFilter className="size-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Filtro
-                    </span>
+                    <span className="sm:whitespace-nowrap">Filtro</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+                  <DropdownMenuLabel>Mostrar</DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
                   <DropdownMenuRadioGroup
@@ -300,13 +434,67 @@ export function HomePage() {
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className="h-7 gap-1 lg:hidden"
+                    variant="default"
+                    size="sm"
+                  >
+                    {orderBy.direction === "asc" ? (
+                      <ArrowUpNarrowWideIcon className="size-3.5" />
+                    ) : (
+                      <ArrowDownNarrowWideIcon className="size-3.5" />
+                    )}
+
+                    <span className="sm:whitespace-nowrap">Ordenar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuRadioGroup
+                    value={orderBy.field}
+                    onValueChange={(value) =>
+                      setOrderBy({
+                        field: value,
+                        direction: orderBy.direction == "asc" ? "desc" : "asc",
+                      })
+                    }
+                  >
+                    <DropdownMenuRadioItem value="name">
+                      Nome
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="document">
+                      Documento
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="access_allowed">
+                      Status
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="test_period_active">
+                      Teste ativo
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="city">
+                      Cidade
+                    </DropdownMenuRadioItem>
+
+                    <DropdownMenuRadioItem value="state">
+                      Estado
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="phone">
+                      Telefone
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <Button
                 onClick={() => {
                   setOpenModalAddCompany(true);
                 }}
                 size="sm"
-                className="size-12 lg:h-7 lg:w-auto gap-1 rounded-full lg:rounded bg-primary hover:bg-primary-dark transition-all duration-200"
+                className="size-12 lg:h-7 lg:w-auto gap-1 rounded-full lg:rounded bg-primary hover:bg-primary-dark transition-all duration-200 fixed lg:static bottom-2 left-5 z-20"
               >
                 <PlusCircle className="size-3.5 hidden lg:block" />
                 <PlusIcon className="lg:hidden block" />
@@ -324,30 +512,8 @@ export function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="overflow-auto relative hidden lg:block">
-              <Table className="table-auto">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="hidden sm:table-cell">
-                      <span className="sr-only">Ícone</span>
-                    </TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Documento</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-balance">Teste ativo</TableHead>
-                    <TableHead className="text-balance">
-                      Dias restante
-                    </TableHead>
-                    <TableHead>Endereço</TableHead>
-                    <TableHead>Bairro</TableHead>
-                    <TableHead>Cidade</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Telefone</TableHead>
-
-                    <TableHead>
-                      <span className="sr-only">Ações</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+              <Table className="table-auto xl:table-fixed">
+                {renderTableHeader()}
                 <TableBody>
                   {loadingCompanies ? (
                     <SkeletonLoading />
@@ -390,12 +556,6 @@ export function HomePage() {
                             : null}
                         </TableCell>
                         <TableCell>
-                          <p className="line-clamp-2">{company.address}</p>
-                        </TableCell>
-                        <TableCell>
-                          <p className="line-clamp-2">{company.neighborhood}</p>
-                        </TableCell>
-                        <TableCell>
                           <p className="whitespace-nowrap">{company.city}</p>
                         </TableCell>
                         <TableCell>
@@ -422,6 +582,14 @@ export function HomePage() {
                               </DropdownMenuLabel>
                               <DropdownMenuItem
                                 onClick={() => {
+                                  handleOpenViewDrawer(company);
+                                }}
+                              >
+                                <EyeIcon size={14} />
+                                <span className="ml-2">Detalhes</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
                                   handleOpenUpdateModal(company);
                                 }}
                               >
@@ -429,6 +597,7 @@ export function HomePage() {
                                 <span className="ml-2">Editar</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
+                                className="text-red-500"
                                 onClick={() => {
                                   handleDeleteCompany(company);
                                 }}
@@ -474,6 +643,14 @@ export function HomePage() {
                           </DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => {
+                              handleOpenViewDrawer(company);
+                            }}
+                          >
+                            <EyeIcon size={14} />
+                            <span className="ml-2">Detalhes</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
                               handleOpenUpdateModal(company);
                             }}
                           >
@@ -481,6 +658,7 @@ export function HomePage() {
                             <span className="ml-2">Editar</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            className="text-red-500"
                             onClick={() => {
                               handleDeleteCompany(company);
                             }}
@@ -546,7 +724,7 @@ export function HomePage() {
                       {company.start_test_period_at &&
                       company.test_period_active ? (
                         <div className="flex justify-between">
-                          <span>Tempo restantes</span>
+                          <span>Dias restantes</span>
                           <p className="text-sm text-muted-foreground">
                             {calculateTestRemainingDays(
                               company.start_test_period_at
@@ -569,11 +747,11 @@ export function HomePage() {
 
                 <div className="inline-flex items-center gap-6 text-xs lg:gap-8 lg:text-sm font-bold">
                   <div className="mr-8 flex items-center gap-2">
-                    <span className="text-white font-semibold">
+                    <span className="dark:text-white text-black font-semibold">
                       Itens por página
                     </span>
                     <Select
-                      defaultValue="8"
+                      defaultValue="20"
                       onValueChange={(value) => {
                         setPerPage(Number(value));
                       }}
@@ -592,7 +770,7 @@ export function HomePage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <span className="text-white font-semibold">
+                  <span className="dark:text-white text-black font-semibold">
                     Página {page} de {totalPages}
                   </span>
 
@@ -681,6 +859,27 @@ export function HomePage() {
           }}
         />
       )}
+
+      {companyToView && (
+        <DrawerViewCompany
+          company={companyToView}
+          onClose={() => setOpenDrawerViewCompany(false)}
+          open={openDrawerViewCompany}
+        />
+      )}
+
+      <Button
+        className={`fixed rounded-full lg:hidden w-8 right-2 p-0 bottom-2 transition-all duration-150 ${
+          !showScrollToTopButton
+            ? "opacity-0 pointer-events-none transform translate-y-10"
+            : ""
+        }`}
+        variant="outline"
+        size="sm"
+        onClick={scrollToTop}
+      >
+        <ChevronUpIcon size={15} />
+      </Button>
     </div>
   );
 }

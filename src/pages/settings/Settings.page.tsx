@@ -33,7 +33,7 @@ export const Settings = () => {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       name: user?.name,
-      email: user?.email,
+      username: user?.username,
       password: "",
       password_confirmation: "",
       testing_period_limit_days: 1,
@@ -127,15 +127,15 @@ export const Settings = () => {
                   ></FormField>
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>E-mail</FormLabel>
+                        <FormLabel>Usuário</FormLabel>
                         <FormControl>
                           <Input
                             icon={<User2Icon size={16} />}
                             iconPosition="left"
-                            placeholder="E-mail"
+                            placeholder="Usuário"
                             {...field}
                           />
                         </FormControl>

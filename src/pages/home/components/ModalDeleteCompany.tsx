@@ -12,7 +12,7 @@ import { axiosService } from "@/services/axios.service";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useState } from "react";
-import { Loader2Icon, Trash2Icon } from "lucide-react";
+import { Loader2Icon, Trash2Icon, HelpCircleIcon } from "lucide-react";
 
 interface ModalDeleteCompanyProps {
   open: boolean;
@@ -30,6 +30,7 @@ export const ModalDeleteCompany = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const handleDelete = () => {
+    setLoading(true);
     axiosService
       .delete(`/companies/${company.id}`)
       .then((response) => {
@@ -65,7 +66,7 @@ export const ModalDeleteCompany = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex justify-center py-5">
-            <Trash2Icon size={90} />
+            <HelpCircleIcon size={90} />
           </div>
           <AlertDialogTitle className="text-balance text-center">
             Tem certeza que deseja deletar a empresa empresa{" "}
@@ -77,10 +78,12 @@ export const ModalDeleteCompany = ({
           <AlertDialogAction
             disabled={loading}
             onClick={handleDelete}
-            className="bg-destructive text-white hover:bg-destructive/80"
+            className="bg-red-600 text-white hover:bg-red-600/70 transition-all duration-70000 ease-in-out"
           >
-            {loading && (
+            {loading ? (
               <Loader2Icon className="size-4 md:size-5 animate-spin inline-block mr-2" />
+            ) : (
+              <Trash2Icon className="size-4 md:size-5 inline-block mr-2" />
             )}
             Deletar
           </AlertDialogAction>

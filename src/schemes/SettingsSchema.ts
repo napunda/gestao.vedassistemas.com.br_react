@@ -3,7 +3,7 @@ import { z } from "zod";
 export const settingsSchema = z
   .object({
     name: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
-    email: z.string().email("Email digitado é inválido"),
+    username: z.string().min(3, "O nome de usuário é obrigatório"),
     password: z.string().optional(),
     password_confirmation: z.string().optional(),
     testing_period_limit_days: z

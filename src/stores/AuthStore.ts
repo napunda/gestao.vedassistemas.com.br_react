@@ -5,6 +5,7 @@ import { axiosService } from "@/services/axios.service";
 interface User {
   name: string;
   email: string;
+  username: string;
   is_admin: boolean;
 }
 
