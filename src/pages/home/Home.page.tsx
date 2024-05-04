@@ -359,7 +359,7 @@ export function HomePage() {
       },
       {
         field: "last_activity_at",
-        label: "Dias sem atividade",
+        label: "Dias inativos",
       },
       {
         field: "city",
@@ -462,6 +462,12 @@ export function HomePage() {
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="test_period_active">
                       Teste ativo
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="start_test_period_at">
+                      Dias restantes
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="last_activity_at">
+                      Dias inativos
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="city">
                       Cidade
@@ -571,7 +577,16 @@ export function HomePage() {
                     <SkeletonLoading />
                   ) : (
                     companiesResponse?.data.map((company) => (
-                      <TableRow key={company.id}>
+                      <TableRow
+                        key={company.id}
+                        className={
+                          company.last_activity_at &&
+                          calculateNotActivityDays(company.last_activity_at) >=
+                            5
+                            ? "opacity-35"
+                            : ""
+                        }
+                      >
                         <TableCell className="hidden sm:table-cell">
                           <ChefHatIcon className="size-6" />
                         </TableCell>
@@ -689,7 +704,15 @@ export function HomePage() {
                 </>
               ) : (
                 companiesResponse?.data.map((company) => (
-                  <Card className="rounded" key={company.id}>
+                  <Card
+                    key={company.id}
+                    className={
+                      company.last_activity_at &&
+                      calculateNotActivityDays(company.last_activity_at) >= 5
+                        ? "opacity-35 rounded"
+                        : "rounded"
+                    }
+                  >
                     <CardHeader className="flex justify-between flex-row items-start border-b py-3">
                       <CardTitle className="text-sm font-bold">
                         {formatDocument(company.document)}
