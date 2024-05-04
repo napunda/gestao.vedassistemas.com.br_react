@@ -74,7 +74,6 @@ import useAuthStore from "@/stores/AuthStore";
 import { DrawerViewCompany } from "./components/DrawerViewCompany";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CompaniesPDF } from "./components/CompaniesPDF";
-import dayjs from "dayjs";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
@@ -817,6 +816,15 @@ export function HomePage() {
                           </p>
                         </div>
                       ) : null}
+                      <div className="flex justify-between">
+                        <span>Dias inativos</span>
+                        <p className="text-sm text-muted-foreground">
+                          {company.last_activity_at
+                            ? calculateNotActivityDays(company.last_activity_at)
+                            : 0}{" "}
+                          dias
+                        </p>
+                      </div>
                     </CardFooter>
                   </Card>
                 ))

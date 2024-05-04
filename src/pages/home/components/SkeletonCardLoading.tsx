@@ -70,6 +70,14 @@ export const SkeletonCardLoading = () => {
             <Skeleton className="w-10 h-3 rounded-full bg-gray-300" />
           </div>
         </div>
+        <div className="flex justify-between">
+          <span>
+            <Skeleton className="w-16 h-3 rounded-full bg-gray-300" />
+          </span>
+          <div className="text-sm text-muted-foreground">
+            <Skeleton className="w-10 h-3 rounded-full bg-gray-300" />
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );
