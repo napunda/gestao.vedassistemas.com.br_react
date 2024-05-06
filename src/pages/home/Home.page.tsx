@@ -122,13 +122,6 @@ export function HomePage() {
     }
   };
 
-  const getTestingPeriodLimitDays = async (userId: number) => {
-    const testingPeriodLimitDays = (
-      await axiosService.get(`/app-config/testing_period_limit_days/${userId}`)
-    ).data;
-    return Number(testingPeriodLimitDays);
-  };
-
   useEffect(() => {
     fetchCompanies();
   }, []);
