@@ -230,29 +230,6 @@ export function HomePage() {
     }
   };
 
-  const calculateTestRemainingDays = async (
-    startTestPeriodAt: Date,
-    userId: number
-  ) => {
-    if (startTestPeriodAt) {
-      const today = new Date();
-      const startDate = new Date(startTestPeriodAt);
-      const totalTestDays = await getTestingPeriodLimitDays(userId);
-
-      const diffTime = Math.abs(today.getTime() - startDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      const remainingDays = totalTestDays - diffDays;
-
-      if (remainingDays < 0) {
-        return 0;
-      }
-
-      return remainingDays;
-    }
-    return null;
-  };
-
   const calculateNotActivityDays = (lastActivityAt: Date | null) => {
     if (lastActivityAt) {
       const today = new Date();
