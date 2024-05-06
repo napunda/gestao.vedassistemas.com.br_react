@@ -77,8 +77,6 @@ import { CompaniesPDF } from "./components/CompaniesPDF";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
-  const [testingPeriodLimitDays, setTestingPeriodLimitDays] =
-    useState<number>(0);
   const searchStore = useSearchStore();
 
   const [companiesResponse, setCompaniesResponse] =
@@ -111,20 +109,24 @@ export function HomePage() {
     params.append("q", searchStore.q);
 
     try {
-      const testingPeriodLimitDays = (
-        await axiosService.get("/app-config/testing_period_limit_days")
-      ).data;
-      setTestingPeriodLimitDays(Number(testingPeriodLimitDays));
-
       const response = await axiosService.get<CompaniesResponse>("/companies", {
         params,
       });
-      setLoadingCompanies(false);
+
       setCompaniesResponse(response.data);
+      setLoadingCompanies(false);
+
       setTotalPages(response.data.last_page);
     } catch (error) {
       setLoadingCompanies(false);
     }
+  };
+
+  const getTestingPeriodLimitDays = async (userId: number) => {
+    const testingPeriodLimitDays = (
+      await axiosService.get(`/app-config/testing_period_limit_days/${userId}`)
+    ).data;
+    return Number(testingPeriodLimitDays);
   };
 
   useEffect(() => {
@@ -228,11 +230,14 @@ export function HomePage() {
     }
   };
 
-  const calculateTestRemainingDays = (startTestPeriodAt: Date) => {
+  const calculateTestRemainingDays = async (
+    startTestPeriodAt: Date,
+    userId: number
+  ) => {
     if (startTestPeriodAt) {
       const today = new Date();
       const startDate = new Date(startTestPeriodAt);
-      const totalTestDays = testingPeriodLimitDays;
+      const totalTestDays = await getTestingPeriodLimitDays(userId);
 
       const diffTime = Math.abs(today.getTime() - startDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -499,7 +504,7 @@ export function HomePage() {
                         <CompaniesPDF companies={companiesResponse.data} />
                       }
                     >
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <FileIcon className="size-3.5" />
                         <span>Exportar</span>
                       </div>
@@ -613,14 +618,7 @@ export function HomePage() {
                             {company.test_period_active ? "Sim" : "Não"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {company.start_test_period_at &&
-                          company.test_period_active
-                            ? calculateTestRemainingDays(
-                                company.start_test_period_at
-                              )
-                            : null}
-                        </TableCell>
+                        <TableCell>{company.remaining_days}</TableCell>
                         <TableCell>
                           <p className="whitespace-nowrap">
                             {company.last_activity_at
@@ -809,10 +807,7 @@ export function HomePage() {
                         <div className="flex justify-between">
                           <span>Dias restantes</span>
                           <p className="text-sm text-muted-foreground">
-                            {calculateTestRemainingDays(
-                              company.start_test_period_at
-                            )}{" "}
-                            dias
+                            {company.remaining_days} dias
                           </p>
                         </div>
                       ) : null}

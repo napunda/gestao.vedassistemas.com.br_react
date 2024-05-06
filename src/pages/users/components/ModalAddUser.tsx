@@ -41,6 +41,7 @@ export const ModalAddUser = ({
     defaultValues: {
       name: "",
       email: "",
+      username: "",
       password: "",
       web_password: "",
     },
@@ -111,6 +112,20 @@ export const ModalAddUser = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              ></FormField>
+
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Usuário</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

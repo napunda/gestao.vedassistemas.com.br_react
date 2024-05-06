@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { axiosService } from "@/services/axios.service";
 
 interface User {
+  id: number;
   name: string;
   email: string;
   username: string;

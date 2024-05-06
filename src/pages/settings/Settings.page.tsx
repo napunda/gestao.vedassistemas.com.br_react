@@ -36,13 +36,13 @@ export const Settings = () => {
       username: user?.username,
       password: "",
       password_confirmation: "",
-      testing_period_limit_days: 1,
+      testing_period_limit_days: 2,
     },
   });
 
   const getTestingPeriodLimitDays = () => {
     axiosService
-      .get("/app-config/testing_period_limit_days")
+      .get(`/app-config/testing_period_limit_days/${user?.id}`)
       .then((response) => {
         form.setValue("testing_period_limit_days", Number(response.data));
       });

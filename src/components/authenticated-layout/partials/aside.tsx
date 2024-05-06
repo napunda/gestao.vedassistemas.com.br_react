@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, Settings, LogOut, Users2 } from "lucide-react";
+import { Home, Settings, LogOut, Users2, ChefHatIcon } from "lucide-react";
 import {
   TooltipProvider,
   Tooltip,
@@ -37,6 +37,20 @@ export const Aside = () => {
             </Tooltip>
           </TooltipProvider>
         ) : null}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/dashboard"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+              >
+                <ChefHatIcon className="size-5" />
+                <span className="sr-only">Empresas</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Empresas</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 py-4">
         <TooltipProvider>

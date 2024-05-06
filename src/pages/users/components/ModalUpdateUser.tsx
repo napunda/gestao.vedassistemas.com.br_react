@@ -44,6 +44,7 @@ export const ModalUpdateUser = ({
     defaultValues: {
       name: user.name ?? "",
       email: user.email ?? "",
+      username: user.username ?? "",
       password: "",
       web_password: "",
     },
@@ -78,7 +79,7 @@ export const ModalUpdateUser = ({
 
           errorsArray.forEach((err) => {
             return form.setError(
-              err as "email" | "name" | "password" | "web_password",
+              err as keyof z.infer<typeof UpdateUserSchema>,
               {
                 type: "manual",
                 message: error.response.data.errors[err][0],
@@ -116,6 +117,20 @@ export const ModalUpdateUser = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              ></FormField>
+
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Usuário</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

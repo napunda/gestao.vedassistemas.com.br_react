@@ -42,6 +42,19 @@ const formatDocument = (document: string) => {
   }
 };
 
+const calculateNotActivityDays = (lastActivityAt: Date | null) => {
+  if (lastActivityAt) {
+    const today = new Date();
+    const lastActivityDate = new Date(lastActivityAt);
+
+    const diffTime = Math.abs(today.getTime() - lastActivityDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays;
+  }
+  return 0;
+};
+
 export const DrawerViewCompany = ({
   open,
   onClose,
@@ -98,12 +111,26 @@ export const DrawerViewCompany = ({
               <Separator className="mb-4" />
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
                 <ItemRender
+                  label="Dias inativos"
+                  value={
+                    company.last_activity_at
+                      ? calculateNotActivityDays(
+                          company.last_activity_at
+                        ).toString()
+                      : "N/A"
+                  }
+                />
+                <ItemRender
                   label="Status"
                   value={company.access_allowed ? "Ativo" : "Inativo"}
                 />
                 <ItemRender
                   label="Período de Teste"
                   value={company.test_period_active ? "Ativo" : "Inativo"}
+                />
+                <ItemRender
+                  label="Dias restantes"
+                  value={company.remaining_days?.toString() ?? "N/A"}
                 />
                 <ItemRender
                   label="Data de Cadastro"

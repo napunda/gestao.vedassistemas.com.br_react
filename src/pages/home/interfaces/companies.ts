@@ -5,6 +5,7 @@ export interface Companies {
   document: string;
   access_allowed: boolean;
   test_period_active: boolean;
+  remaining_days?: number | null;
   name: string;
   address?: string | null;
   complement?: string | null;

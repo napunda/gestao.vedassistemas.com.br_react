@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: "center",
     fontFamily: "Red Hat Display",
+    fontWeight: "extrabold",
   },
   text: {
     margin: 12,
@@ -47,6 +48,18 @@ interface ICompaniesPDFProps {
 }
 
 export const CompaniesPDF = ({ companies }: ICompaniesPDFProps) => {
+  const calculateNotActivityDays = (lastActivityAt: Date | null) => {
+    if (lastActivityAt) {
+      const today = new Date();
+      const lastActivityDate = new Date(lastActivityAt);
+
+      const diffTime = Math.abs(today.getTime() - lastActivityDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return diffDays;
+    }
+    return 0;
+  };
   return (
     <Document>
       {companies.map((company) => (
@@ -54,8 +67,13 @@ export const CompaniesPDF = ({ companies }: ICompaniesPDFProps) => {
           <Text style={styles.title}>{company.name}</Text>
           <Text style={styles.text}>ID: {company.id}</Text>
           <Text style={styles.text}>ID Machine: {company.id_machine}</Text>
-          <Text style={styles.text}>ID Machin {company.id_machine}</Text>
           <Text style={styles.text}>Documento {company.document}</Text>
+          <Text style={styles.text}>
+            Dias inativo:{" "}
+            {company.last_activity_at
+              ? calculateNotActivityDays(company.last_activity_at)
+              : 0}
+          </Text>
           <Text style={styles.text}>
             Status: {company.access_allowed ? "Ativo" : "Inativo"}
           </Text>
@@ -68,19 +86,26 @@ export const CompaniesPDF = ({ companies }: ICompaniesPDFProps) => {
               ? new Date(company.start_test_period_at).toLocaleDateString()
               : "N/A"}
           </Text>
-          <Text style={styles.text}>Endereço: {company.address}</Text>
-          <Text style={styles.text}>Estado: {company.state}</Text>
-          <Text style={styles.text}>Cidade: {company.city}</Text>
-          <Text style={styles.text}>Complemento: {company.complement}</Text>
-          <Text style={styles.text}>Bairro: {company.neighborhood}</Text>
-          <Text style={styles.text}>Telefone: {company.phone}</Text>
+          <Text style={styles.text}>
+            Dias restantes: {company.remaining_days ?? "N/A"}
+          </Text>
+          <Text style={styles.text}>Endereço: {company.address ?? "N/A"}</Text>
+          <Text style={styles.text}>Estado: {company.state ?? "N/A"}</Text>
+          <Text style={styles.text}>Cidade: {company.city ?? "N/A"}</Text>
+          <Text style={styles.text}>
+            Complemento: {company.complement ?? "N/A"}
+          </Text>
+          <Text style={styles.text}>
+            Bairro: {company.neighborhood ?? "N/A"}
+          </Text>
+          <Text style={styles.text}>Telefone: {company.phone ?? "N/A"}</Text>
           <Text style={styles.text}>
             Criado em: {new Date(company.created_at).toLocaleDateString()}
           </Text>
           <Text
             style={styles.pageNumber}
             render={({ pageNumber, totalPages }) =>
-              `${pageNumber} - ${totalPages}`
+              `${pageNumber} / ${totalPages}`
             }
             fixed
           />

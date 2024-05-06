@@ -4,6 +4,9 @@ export const UpdateUserSchema = z
   .object({
     email: z.string().email("Email digitado é inválido"),
     name: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
+    username: z
+      .string()
+      .min(3, "O nome de usuário deve ter no mínimo 3 caracteres"),
     password: z.string().optional(),
     web_password: z.string().optional(),
     user_id: z.number().optional(),

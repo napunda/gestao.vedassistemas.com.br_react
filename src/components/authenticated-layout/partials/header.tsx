@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,7 +27,6 @@ import {
   UserIcon,
   Users2,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
