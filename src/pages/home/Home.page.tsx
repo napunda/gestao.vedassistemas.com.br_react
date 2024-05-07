@@ -74,6 +74,7 @@ import useAuthStore from "@/stores/AuthStore";
 import { DrawerViewCompany } from "./components/DrawerViewCompany";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CompaniesPDF } from "./components/CompaniesPDF";
+import dayjs from "dayjs";
 
 export function HomePage() {
   let [searchParams, setSearchParams] = useSearchParams();
@@ -333,7 +334,7 @@ export function HomePage() {
       },
       {
         field: "last_activity_at",
-        label: "Dias inativos",
+        label: "Último acesso",
       },
       {
         field: "city",
@@ -441,7 +442,7 @@ export function HomePage() {
                       Dias restantes
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="last_activity_at">
-                      Dias inativos
+                      Último acesso
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="city">
                       Cidade
@@ -592,10 +593,10 @@ export function HomePage() {
                         <TableCell>
                           <p className="whitespace-nowrap">
                             {company.last_activity_at
-                              ? calculateNotActivityDays(
-                                  company.last_activity_at
+                              ? dayjs(company.last_activity_at).format(
+                                  "DD/MM/YYYY"
                                 )
-                              : 0}
+                              : "N/A"}
                           </p>
                         </TableCell>
                         <TableCell>
@@ -785,8 +786,10 @@ export function HomePage() {
                         <span>Dias inativos</span>
                         <p className="text-sm text-muted-foreground">
                           {company.last_activity_at
-                            ? calculateNotActivityDays(company.last_activity_at)
-                            : 0}{" "}
+                            ? dayjs(company.last_activity_at).format(
+                                "DD/MM/YYYY"
+                              )
+                            : "N/A"}
                           dias
                         </p>
                       </div>
